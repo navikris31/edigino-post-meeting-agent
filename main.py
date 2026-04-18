@@ -1,5 +1,5 @@
 from fastapi import FastAPI, BackgroundTasks, HTTPException
-from typing import Optional
+from typing import Optional, Dict, Any
 from pydantic import BaseModel
 import uvicorn
 import json
@@ -85,6 +85,18 @@ async def handle_manual_trigger(event: MeetingEvent, background_tasks: Backgroun
     background_tasks.add_task(process_meeting_background, event)
     return {"status": "Manual processing scheduled", "meeting_id": event.meeting_id}
 
+
+@app.post("/api/webhooks/krisp")
+async def handle_krisp_honeypot(payload: Dict[str, Any]):
+    """
+    Honeypot endpoint to capture Krisp's native webhook JSON payload.
+    It simply prints the entire JSON to the terminal for us to study.
+    """
+    print("\\n" + "="*50)
+    print("🚨 KRISP WEBHOOK INTERCEPTED 🚨")
+    print(json.dumps(payload, indent=2))
+    print("="*50 + "\\n")
+    return {"status": "Krisp payload received and logged successfully!"}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
